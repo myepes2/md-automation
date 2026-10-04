@@ -9,8 +9,12 @@ description = "Focused automation tools for molecular-dynamics workflows"
 readme = "README.md"
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+frames = ["MDAnalysis>=2.7"]
+
 [project.scripts]
 md-automation = "md_automation.charmm_gui_gromacs:main"
+md-frames = "md_automation.frames:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

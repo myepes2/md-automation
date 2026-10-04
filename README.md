@@ -21,6 +21,28 @@ Python 3.10 or newer is recommended because the package uses modern type annotat
 python -m pip install -e .
 ```
 
+## md-frames — key-frame extraction
+
+`md-frames` pulls key-frame PDBs out of a trajectory, optionally after
+least-squares alignment — the step that produces `frames/` in the FTSW
+data tree when a trajectory is aligned during post-processing.
+
+```text
+pip install -e '.[frames]'   # pulls in MDAnalysis
+
+md-frames --top top.psf --traj traj.dcd --name 62x_s10 \
+          --frames first,last,quarters \
+          --align "protein and name CA" \
+          --select "protein or resname UNDP ANAM BNAG BNAM ADGG MDAP DALA" \
+          --outdir frames
+```
+
+Frame spec: `first`, `last`, `all`, `every:N`, `quarters`, `range:A-B`,
+or comma-separated indices (mixable). Output files are
+`<name>_<frameindex>.pdb`; when `--outdir` sits under a `sims/` tree the
+tool prints manifest-ready `frames:` entries. Alignment targets
+`--align-ref` (a reference PDB) or trajectory frame 0.
+
 ## Use
 
 ```text
