@@ -161,6 +161,37 @@ currently-hard-coded fields (partitions, times, ntasks, gpu directives).
   `continue.sh`) appends N more chunks after the last existing
   `step7_<k>` — the "continuation helper" nice-to-have.
 
+## 6b. Iteration resilience (user-requested)
+
+Real usage: the pipeline usually fails once at minimization (grompp
+warnings, `-maxwarn`, clashing atoms in the built PDB), gets hand-fixed,
+resubmitted, and occasionally needs equilibration tweaks too. Two
+mechanisms make that loop cheap:
+
+- **Resumable stages.** Every generated job script begins by checking
+  for its `.done_<deffnm>` marker and exits 0 immediately if present;
+  the marker is `touch`ed only after `mdrun` succeeds (scripts run under
+  `set -euo pipefail`). `submit_all.sh` can therefore be re-run verbatim
+  after an edit — finished stages skip in seconds, `afterok` deps stay
+  satisfied, and the chain resumes at the first unfinished stage. To
+  redo a stage: delete its `.done_*` file. This works identically under
+  slurm/pbs (skip-job satisfies `afterok`) and under the bash runner.
+- **Preflight.** A generated `preflight.sh` runs `gmx grompp` for every
+  stage without submitting — for stages whose input `.gro` doesn't exist
+  yet it substitutes `step5_input.gro`, since grompp's topology/index/
+  mdp validation (the class of errors that actually kills day one) is
+  mostly coordinate-independent. `--dry-run` does the same inspection
+  without writing anything.
+- **Knobs in config, not edits.** `grompp_maxwarn`, double-precision
+  minimization (`gmx_d`, which the CHARMM-GUI README itself uses for
+  minimization), and resource values all come from the cluster config —
+  regenerating a pipeline doesn't stomp hand-tuned values.
+
+What stays manual, deliberately: physics problems (bad clashes,
+under-equilibrated membranes) and judgment calls (restraint schedules,
+how long to equilibrate). The tool's job is fast detection and a tight
+edit→rerun loop, not auto-fixing.
+
 ## 7. Nice-to-haves wired in now
 
 - `--dry-run`: parse + plan, print the stage table and detected layout,

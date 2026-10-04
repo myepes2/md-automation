@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "md-automation"
-version = "0.1.0"
+version = "0.2.0"
 description = "Focused automation tools for molecular-dynamics workflows"
 readme = "README.md"
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
 frames = ["MDAnalysis>=2.7"]
+config = ["pyyaml>=6.0"]
 
 [project.scripts]
 md-automation = "md_automation.charmm_gui_gromacs:main"
